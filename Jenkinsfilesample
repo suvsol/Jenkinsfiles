@@ -1,0 +1,102 @@
+pipeline {
+    // agent {
+
+    // }
+
+    agent any
+    environment {
+        myVariable = "Testing"
+    }
+    parameters {
+        string defaultValue: '0.0.1-myapp.jar', name: 'package'
+        choice choices: ['dev', 'test', 'stage', 'prod'], name: 'deploy_env'
+    }
+    options {
+        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '5', numToKeepStr: '5')
+        timeout(time: 60, unit: 'SECONDS')
+    }
+    stages {
+        stage('checkout'){
+            steps {
+                echo "This is my checkout stage"
+                echo "The Environment variable is - ${env.myVariable} - $myVariable"
+            }
+        }
+        stage('Build'){
+            steps {
+                echo "This is my Build"
+            }
+        }
+        stage('Testing'){
+            steps {
+                echo "This is my test stage"
+            }
+        }
+        stage('deploy-prod'){
+            when {
+                expression{
+                    params.deploy_env == "prod"
+                }
+            }
+            steps {
+                script {
+                    upload(params.deply_env)
+                }
+                echo "Deployment production"
+            }
+        }
+        stage('deploy-dev'){
+            when {
+                expression {
+                    params.deploy_env == "dev"
+                }
+            }
+            steps {
+                script {
+                    upload(params.deply_env)
+                }
+                echo "Deployment to dev"
+            }
+        }
+        stage('deploy-test'){
+            input {
+                message 'Do you Want me to Deploy?'
+                ok 'Yes'
+            }
+            when {
+                expression {
+                    params.deploy_env == "test"
+                }
+            }
+            steps {
+                script {
+                    upload(params.deply_env)
+                }
+                echo "Deployment to test"
+            }
+        }
+        stage('deploy-stage'){
+            when {
+                expression {
+                    params.deploy_env == "stage"
+                }
+            }
+            steps {
+                script {
+                    upload(params.deply_env)
+                }
+                echo "Deployment to stage"
+            }
+        }
+    }
+}
+
+def upload(deployEnv) {
+    echo "This is my function"
+    if (deployEnv == "prod") {
+        echo "Do this task on this server which is a prod"
+    }
+    else {
+        echo "Do this is tasnk become deply env is non prod"
+    }
+}
