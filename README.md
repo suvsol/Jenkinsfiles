@@ -1,4 +1,5 @@
 # Jenkinsfiles
 Contains all Jenkins files
 
-adding test
+## how to use
+create a pipeline in jenkins
